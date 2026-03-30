@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Cursor MCP 启动器：在拉起 gitnexus mcp 前自动确保 Swift 解析器（stdio 不变）。
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+bash "$SCRIPT_DIR/ensure-gitnexus-swift-parser.sh"
+
+NODE_BIN="$(command -v node)"
+GROOT="$(npm root -g)/gitnexus"
+CLI_JS="$GROOT/dist/cli/index.js"
+
+if [[ ! -f "$CLI_JS" ]]; then
+  echo "gitnexus-mcp: 未找到 $CLI_JS" >&2
+  exit 1
+fi
+
+exec "$NODE_BIN" "$CLI_JS" mcp "$@"

@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# 调用真实全局 gitnexus 前先确保 tree-sitter-swift 可用（避免每次手动跑 install 脚本）。
+#
+# 用法：把本目录加入 PATH，并放在 Homebrew bin 之前，例如 ~/.zshrc：
+#   export PATH="/Users/cm/Desktop/Board/scripts:$PATH"
+# 或设置 GITNEXUS_REAL_BIN 指向 npm 安装的 gitnexus 可执行文件。
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+
+resolve_real_gitnexus() {
+  if [[ -n "${GITNEXUS_REAL_BIN:-}" && -x "${GITNEXUS_REAL_BIN}" ]]; then
+    echo "$GITNEXUS_REAL_BIN"
+    return
+  fi
+  local p
+  for p in /opt/homebrew/bin/gitnexus /usr/local/bin/gitnexus; do
+    if [[ -x "$p" ]]; then
+      echo "$p"
+      return
+    fi
+  done
+  command -v gitnexus
+}
+
+REAL="$(resolve_real_gitnexus || true)"
+if [[ -z "$REAL" || ! -x "$REAL" ]]; then
+  echo "找不到全局 gitnexus，请先: npm install -g gitnexus" >&2
+  exit 1
+fi
+
+# 若 PATH 里优先的是本脚本，避免误把 wrapper 当 REAL
+if [[ "$REAL" == "$SCRIPT_DIR/gitnexus" ]] || [[ "$REAL" == *"/scripts/gitnexus" ]]; then
+  for p in /opt/homebrew/bin/gitnexus /usr/local/bin/gitnexus; do
+    if [[ -x "$p" ]]; then
+      REAL="$p"
+      break
+    fi
+  done
+fi
+
+bash "$SCRIPT_DIR/ensure-gitnexus-swift-parser.sh"
+exec "$REAL" "$@"

@@ -1,0 +1,4 @@
+${PODS_ROOT}/Target Support Files/Pods-Board/Pods-Board-frameworks.sh
+${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework
+${BUILT_PRODUCTS_DIR}/Yoga/yoga.framework
+${BUILT_PRODUCTS_DIR}/YogaKit/YogaKit.framework
